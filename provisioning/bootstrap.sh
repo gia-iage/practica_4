@@ -197,7 +197,6 @@ fi
 touch $USER_DIR/authorized_keys 2>/dev/null
 sed -i '/127.0.1.1.*packer-/d' /etc/hosts 2>/dev/null
 sed -i '/127.0.2.1/d' /etc/hosts 2>/dev/null
-sed -i "/master/d" $SSH_DIR/authorized_keys >& /dev/null
 grep -q -f $SSH_PUBLIC_KEY $USER_DIR/authorized_keys || cat $SSH_PUBLIC_KEY >> $USER_DIR/authorized_keys
 chown vagrant:vagrant $SSH_DIR/authorized_keys
 chmod 0600 $SSH_DIR/authorized_keys
