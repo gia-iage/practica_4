@@ -2,9 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import explode, split, col, lower, regexp_replace
 import sys
 import os
-import time  # <--- Importamos para medir el tiempo
+import time
 
-# 1. Validación de argumentos
 if len(sys.argv) < 2:
     print("Error: Indica la ruta del fichero en HDFS.")
     sys.exit(1)
@@ -13,7 +12,6 @@ input_path = sys.argv[1]
 base_name = os.path.basename(input_path).split('.')[0]
 output_path = f"/resultados/{base_name}_counts"
 
-# 2. Inicializar sesión
 spark = SparkSession.builder.appName(f"WordCount_Timer_{base_name}").getOrCreate()
 
 try:
@@ -22,10 +20,10 @@ try:
     # --- INICIO DEL TIEMPO ---
     start_time = time.time()
 
-    # 3. Leer el fichero
+    # Leer el fichero
     df = spark.read.text(input_path)
 
-    # 4. Procesamiento (Limpieza y filtrado)
+    # Procesamiento (Limpieza y filtrado)
     stop_words = ["sus", "o", "al", "con", "lo", "le", "me", "mi", "su", "de", 
                   "la", "que", "el", "en", "y", "a", "los", "del", "se", "las", 
                   "por", "un", "una", "es", "no", "más", "como", "dijo", "su"]
@@ -41,8 +39,8 @@ try:
                      .count() \
                      .orderBy(col("count").desc())
 
-    # 5. Ejecutar y Guardar (Acciones que disparan el trabajo en los Workers)
-    # Importante: Spark es "lazy", si no hacemos una acción, el cronómetro no medirá nada real.
+    # 5Ejecutar y Guardar (Acciones que disparan el trabajo en los Workers)
+    # Importante: Spark es "lazy", si no hacemos una acción, el cronómetro no medirá nada real
     resultado.write.mode("overwrite").parquet(output_path)
     
     # --- FIN DEL TIEMPO ---
@@ -50,7 +48,7 @@ try:
     
     duration = end_time - start_time
 
-    # 6. Resultados
+    # Resultados
     print("\n" + "="*50)
     print("¡Proceso completado con éxito!")
     print(f"Tiempo total: {duration:.2f} segundos")

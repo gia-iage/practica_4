@@ -1,7 +1,6 @@
 import pandas as pd
 import sys
 
-# 1. Validación de argumentos (cero hardcodeo)
 if len(sys.argv) < 2:
     print("Error: Debes indicar la ruta local del archivo Parquet.")
     print("Uso: python leer_local.py /ruta/local/fichero.parquet")
@@ -12,16 +11,16 @@ ruta_local = sys.argv[1]
 print(f"\n>>> Leyendo el fichero local con Pandas: {ruta_local}")
 
 try:
-    # 2. Leemos el Parquet
+    # Leemos el Parquet
     df_modelo = pd.read_parquet(ruta_local)
 
-    # 3. Mostramos las columnas disponibles
+    # Mostramos las columnas disponibles
     print("\n--- Las columnas que ha encontrado Pandas ---")
     print(df_modelo.columns.tolist())
 
     print("\n--- El contenido de la Ecuación Matemática ---")
     
-    # 4. Extraemos la primera fila (solo hay un modelo)
+    # Extraemos la primera fila (solo hay un modelo)
     fila_modelo = df_modelo.iloc[0]
     
     # Extraemos los diccionarios y los formateamos en vertical

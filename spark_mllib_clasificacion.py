@@ -13,7 +13,6 @@ if len(sys.argv) < 2:
 
 ruta_entrada = sys.argv[1]
 
-# Inicializamos Spark
 spark = SparkSession.builder.appName("MLlib_PrediccionCompras").getOrCreate()
 
 try:
@@ -29,7 +28,7 @@ try:
     df_transformado = assembler.transform(df)
 
     print(">>> 3. Dividiendo los datos: Train (70%) y Test (30%)...")
-    # Es vital en IA no examinar al modelo con los datos que usó para estudiar
+    # Es vital no evaluar al modelo con los datos que usó para entrenar
     train_data, test_data = df_transformado.randomSplit([0.7, 0.3], seed=42)
 
     print(">>> 4. Entrenando el modelo (Regresión Logística)...")
@@ -54,7 +53,7 @@ try:
     print("RESULTADOS DEL MODELO MLlib")
     print(f"Precisión del modelo: {precision * 100:.2f}%")
     print("\nComparativa real vs predicción (Primeros 10 casos):")
-    # Mostramos: Edad, Saldo, Lo que realmente pasó, y la Adivinanza de la IA
+    # Mostramos: Edad, Saldo, Lo que realmente pasó, y la predicción del modelo
     predicciones.select("edad", "saldo", "comprara_producto", "prediction").show(10)
     print("="*60)
     print(f"Ecuación aprendida - Coeficientes: {modelo.coefficients}")
