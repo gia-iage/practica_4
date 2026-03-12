@@ -109,6 +109,7 @@ fi
 
 systemctl unmask systemd-timesyncd
 systemctl enable systemd-timesyncd.service
+timedatectl set-ntp true
 systemctl restart systemd-timesyncd.service
 
 # Install software
@@ -132,6 +133,8 @@ fi
 # NFS and SSH keys setup
 SSH_PUBLIC_KEY=/share/.id_rsa.pub
 SSH_DIR=/home/vagrant/.ssh
+mkdir -p $USER_DIR
+chmod 700 $USER_DIR
 
 if [ ! -d "/share" ]; then
     mkdir /share >& /dev/null
@@ -191,9 +194,10 @@ if [ ! -f $SSH_PUBLIC_KEY ]; then
 	exit -1
 fi
 
-sed -i '/127.0.1.1.*packer-amd64/d' /etc/hosts
-sed -i '/127.0.2.1/d' /etc/hosts
+touch $USER_DIR/authorized_keys 2>/dev/null
+sed -i '/127.0.1.1.*packer-/d' /etc/hosts 2>/dev/null
+sed -i '/127.0.2.1/d' /etc/hosts 2>/dev/null
 sed -i "/master/d" $SSH_DIR/authorized_keys >& /dev/null
-cat $SSH_PUBLIC_KEY >> $SSH_DIR/authorized_keys
+grep -q -f $SSH_PUBLIC_KEY $USER_DIR/authorized_keys || cat $SSH_PUBLIC_KEY >> $USER_DIR/authorized_keys
 chown vagrant:vagrant $SSH_DIR/authorized_keys
 chmod 0600 $SSH_DIR/authorized_keys
