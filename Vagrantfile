@@ -9,11 +9,8 @@ Vagrant.require_version ">= 2.4.9"
 # 25/26, utilizará el siguiente prefijo: rre2526
 STUDEN_PREFIX = "X"
 
-# Hostnames for master and worker nodes
-MASTER_HOSTNAME = "#{STUDEN_PREFIX}-master"
-WORKER_HOSTNAME = "#{STUDEN_PREFIX}-worker"
-
 # Master settings
+MASTER_HOSTNAME = "#{STUDEN_PREFIX}-master"
 MASTER_IP = "192.168.56.10"
 MASTER_CORES = 1
 MASTER_MEM = 2048
@@ -28,7 +25,7 @@ WORKER_DISK_SIZE='8GB'
 
 require 'ipaddr'
 CLUSTER_IP_ADDR = IPAddr.new MASTER_IP
-CLUSTER_IP_ADDR = CLUSTER_IP_ADDR.succ
+CLUSTER_DOMAIN = "cluster.local"
 
 ENV["VAGRANT_NO_PARALLEL"] = "yes"
 
@@ -47,6 +44,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "master", primary: true do |master|
     master.vm.hostname = MASTER_HOSTNAME
     master.vm.network "private_network", ip: MASTER_IP
+    master.hostmanager.aliases = ["#{MASTER_HOSTNAME}.#{CLUSTER_DOMAIN}"]
 
     for i in 1..MASTER_NUM_DISKS do
         master.vm.disk :disk, size: MASTER_DISK_SIZE, primary: false, name: "disk#{i}"
@@ -76,21 +74,22 @@ Vagrant.configure("2") do |config|
   # Worker nodes
   (1..NUM_WORKERS).each do |i|
     config.vm.define "worker#{i}" do |worker|
-	      worker.vm.hostname = "#{WORKER_HOSTNAME}#{i}"
-	      IP_ADDR = CLUSTER_IP_ADDR.to_s
+        current_worker_hostname = "#{STUDEN_PREFIX}-worker#{i}"
+        worker.vm.hostname = current_worker_hostname
         CLUSTER_IP_ADDR = CLUSTER_IP_ADDR.succ
-        worker.vm.network "private_network", ip: IP_ADDR
+        worker.vm.network "private_network", ip: CLUSTER_IP_ADDR.to_s
+        worker.hostmanager.aliases = ["#{current_worker_hostname}.#{CLUSTER_DOMAIN}"]
         
         for i in 1..WORKER_NUM_DISKS do
             worker.vm.disk :disk, size: WORKER_DISK_SIZE, primary: false, name: "disk#{i}"
         end
     
         worker.vm.provider "virtualbox" do |vb|
-	          vb.name = "IAGE-#{worker.vm.hostname}"
-	          vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+	    vb.name = "IAGE-#{worker.vm.hostname}"
+	    vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
             vb.cpus = WORKER_CORES
             vb.memory = WORKER_MEM
-	          vb.gui = false
+	    vb.gui = false
         end
         
         worker.vm.provider "libvirt" do |libv|

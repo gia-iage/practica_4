@@ -8,6 +8,10 @@ if [ "$#" -ne 1 ]; then
 fi
 
 MASTER_HOSTNAME=$1
+CURRENT_HOST=$(hostname)
+
+sed -i '/127.0.1.1.*packer-/d' /etc/hosts 2>/dev/null
+sed -i '/127.0.2.1/d' /etc/hosts 2>/dev/null
 
 if [ -b /dev/sdb ]; then
     DISK0=/dev/sdb
@@ -55,7 +59,7 @@ fi
 if [ ! -d "/data/disk2" ]; then
     mkdir -p /data/disk2 >& /dev/null
     mkfs.ext4 -F $DISK2
-    mount /$DISK2 /data/disk2
+    mount $DISK2 /data/disk2
     chmod 1777 /data/disk2
 else
     if ! grep -Fq $DISK2 /proc/mounts ; then
@@ -144,9 +148,9 @@ if grep -Fq /share /etc/fstab ; then
     sed -i "/share/d" /etc/fstab
 fi
 
-if [ "$(hostname)" = "$MASTER_HOSTNAME" ]; then
+if [ "$CURRENT_HOST" = "$MASTER_HOSTNAME" ]; then
     # Install NFS server
-    echo "==> Installing and configuring NFS server..."
+    echo "==> Installing and configuring NFS server on $CURRENT_HOST..."
     if ! apt-get install -y -qq nfs-kernel-server >/tmp/apt.log 2>&1; then
     	echo "Error when installing software, log:"
     	cat /tmp/apt.log
@@ -185,7 +189,7 @@ else
     if ! grep -Fq /share /etc/fstab ; then
         echo -e "$MASTER_HOSTNAME:/share        /share     nfs    auto,relatime,tcp       0       0" >> /etc/fstab
     fi
-    echo "Mounting NFS export"
+    echo "Mounting NFS export on $CURRENT_HOST"
     sleep 2 && mount $MASTER_HOSTNAME:/share /share
 fi
 
@@ -195,8 +199,6 @@ if [ ! -f $SSH_PUBLIC_KEY ]; then
 fi
 
 touch $SSH_DIR/authorized_keys 2>/dev/null
-sed -i '/127.0.1.1.*packer-/d' /etc/hosts 2>/dev/null
-sed -i '/127.0.2.1/d' /etc/hosts 2>/dev/null
 grep -q -f $SSH_PUBLIC_KEY $SSH_DIR/authorized_keys || cat $SSH_PUBLIC_KEY >> $SSH_DIR/authorized_keys
 chown vagrant:vagrant $SSH_DIR/authorized_keys
 chmod 0600 $SSH_DIR/authorized_keys

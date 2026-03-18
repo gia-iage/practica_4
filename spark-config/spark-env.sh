@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-export SPARK_MASTER_HOST=X-master
-export SPARK_LOCAL_IP=$(hostname)
-export SPARK_PUBLIC_DNS=$(hostname)
+export SPARK_MASTER_HOST="X-master.cluster.local"
+export SPARK_LOCAL_IP="$(hostname).cluster.local"
+export SPARK_PUBLIC_DNS="$(hostname).cluster.local"
 export SPARK_DAEMON_MEMORY=512m
 export SPARK_WORKER_CORES=1
 export SPARK_WORKER_MEMORY=1g
