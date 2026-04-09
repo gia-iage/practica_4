@@ -185,12 +185,15 @@ EOF
     exportfs -ra
 else
     sed -i '/127.0.1.1.*-worker/d' /etc/hosts
-    umount /share >& /dev/null && sleep 2
+    umount /share >& /dev/null || true
     if ! grep -Fq /share /etc/fstab ; then
-        echo -e "$MASTER_HOSTNAME:/share        /share     nfs    auto,relatime,tcp       0       0" >> /etc/fstab
+        echo -e "$MASTER_HOSTNAME:/share        /share     nfs    nfsvers=4.2,defaults,relatime,_netdev       0       0" >> /etc/fstab
     fi
+    
+    systemctl daemon-reload
+    sleep 1
     echo "Mounting NFS export on $CURRENT_HOST"
-    sleep 2 && mount $MASTER_HOSTNAME:/share /share
+    mount /share
 fi
 
 if [ ! -f $SSH_PUBLIC_KEY ]; then
