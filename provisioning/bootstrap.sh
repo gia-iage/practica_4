@@ -111,14 +111,7 @@ if ! grep -Fq $DISK2 /etc/fstab ; then
     echo -e "$DISK2        /data/disk2     ext4    defaults,relatime       0       0" >> /etc/fstab
 fi
 
-systemctl unmask systemd-timesyncd
-systemctl enable systemd-timesyncd.service
-timedatectl set-ntp true
-systemctl restart systemd-timesyncd.service
-
 # Install software
-rm -rf /var/lib/apt/lists/*
-apt-get clean
 apt-get update
 SOFTWARE="nano sshpass unzip python3-venv python-apt-common fdisk dnsutils dos2unix whois nfs-common openjdk-21-jdk systemd-timesyncd"
 echo "==> Installing software packages..."
@@ -128,6 +121,11 @@ if ! apt-get install -y -qq $SOFTWARE > /tmp/apt.log 2>&1; then
     exit 1
 fi
 echo "==> done"
+
+systemctl unmask systemd-timesyncd
+systemctl enable systemd-timesyncd.service
+timedatectl set-ntp true
+systemctl restart systemd-timesyncd.service
 
 # .profile
 if ! grep -q "PATH=/sbin:\$PATH" /home/vagrant/.profile; then
@@ -166,6 +164,7 @@ if [ "$CURRENT_HOST" = "$MASTER_HOSTNAME" ]; then
 		echo "SSH public key could not be created"
 		exit -1
 	fi
+	echo "SSH keys created"
     fi
 
     if [ ! -f /etc/ssh/ssh_config.d/90-key-checking.conf ]; then
