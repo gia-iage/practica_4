@@ -39,7 +39,7 @@ try:
                      .count() \
                      .orderBy(col("count").desc())
 
-    # 5Ejecutar y Guardar (Acciones que disparan el trabajo en los Workers)
+    # Ejecutar y guardar (Acciones que disparan el trabajo en los Workers)
     # Importante: Spark es "lazy", si no hacemos una acción, el cronómetro no medirá nada real
     resultado.write.mode("overwrite").parquet(output_path)
     
