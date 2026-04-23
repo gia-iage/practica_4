@@ -111,6 +111,11 @@ if ! grep -Fq $DISK2 /etc/fstab ; then
     echo -e "$DISK2        /data/disk2     ext4    defaults,relatime       0       0" >> /etc/fstab
 fi
 
+systemctl unmask systemd-timesyncd >& /dev/null
+systemctl enable systemd-timesyncd.service >& /dev/null
+timedatectl set-ntp true
+systemctl restart systemd-timesyncd.service >& /dev/null
+
 # Install software
 apt-get update
 SOFTWARE="nano sshpass unzip python3-venv python-apt-common fdisk dnsutils dos2unix whois nfs-common openjdk-21-jdk systemd-timesyncd"
@@ -121,11 +126,6 @@ if ! apt-get install -y -qq $SOFTWARE > /tmp/apt.log 2>&1; then
     exit 1
 fi
 echo "==> done"
-
-systemctl unmask systemd-timesyncd
-systemctl enable systemd-timesyncd.service
-timedatectl set-ntp true
-systemctl restart systemd-timesyncd.service
 
 # .profile
 if ! grep -q "PATH=/sbin:\$PATH" /home/vagrant/.profile; then
